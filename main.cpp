@@ -2,6 +2,8 @@
 
 int main(int argc , char *argv[]) 
 {
-    read_json();	
+    Json::Value root = read_json();
+    cout << ls().list_transfer;
+    
 	return 0; 
-} 
+}
