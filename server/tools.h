@@ -14,9 +14,21 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>  
+#include <arpa/inet.h>
+#include <sys/socket.h>  
+#include <netinet/in.h>  
+#include <sys/time.h>
+#include <netdb.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <fcntl.h>
+
 
 #define TRUE 1
 #define False 0
+#define SERVER_ADDRESS "127.0.0.1"
+
 
 using namespace std;
 
@@ -39,6 +51,12 @@ struct ls_out {
     vector <string> list;
     string list_transfer = "226: List transfer done.\n";
 }; 
+
+int client_sockets[30];
+int server_socket_1, server_socket_2;
+extern int max_clients;
+struct sockaddr_in address_1, address_2;
+int port_1, port_2;
 
 typedef struct ls_out Struct; 
 

@@ -13,6 +13,9 @@ main.o: main.cpp tools.h
 tools.o: tools.cpp tools.h
 	$(CC) $(COMPILE_FLAGS) tools.cpp
 
+server.o: server.cpp tools.h
+	$(CC) $(COMPILE_FLAGS) server.cpp
+
 .PHONY: clean
 
 clean:
