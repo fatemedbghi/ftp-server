@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <string.h>
 
 #define TRUE 1
 #define False 0
@@ -24,6 +25,15 @@ const string invalid = "430: Invalid username or password\n";
 const string no_username = "503: Bad sequence of commands.\n";
 const string valid_password = "230: User logged in, proceed. Logged out if appropriate.\n";
 const string illegal_access = "550: File unavailable.\n";
+const string change = "250: Successful change.\n";
+const string download_st = "226: Successful download.\n";
+const string logout = "221: Successful Quit.\n";
+
+// ERRORS
+const string not_logged_in = "332: Need account for login.\n";
+const string syntax = "501: Syntax error in parameters or arguments.\n";
+const string error = "500: Error\n";
+const string data = "425: Can't open data connection.";
 
 struct ls_out { 
     vector <string> list;
@@ -40,5 +50,10 @@ string mkd(string path);
 string delete_file(string name);
 string delete_directory(string path);
 Struct ls();
+string cwd(string path);
+string rename_file(string from, string to);
+string rtr(string name);
+string help();
+string quit();
 
 #endif
