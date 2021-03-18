@@ -23,12 +23,12 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <fcntl.h>
-
+#include <stdlib.h>  
+#include <cstdint>
 
 #define TRUE 1
 #define False 0
 #define SERVER_ADDRESS "127.0.0.1"
-
 
 using namespace std;
 
@@ -52,12 +52,6 @@ struct ls_out {
     string list_transfer = "226: List transfer done.\n";
 }; 
 
-int client_sockets[30];
-int server_socket_1, server_socket_2;
-extern int max_clients;
-struct sockaddr_in address_1, address_2;
-int port_1, port_2;
-
 typedef struct ls_out Struct; 
 
 Json::Value read_json();
@@ -73,5 +67,9 @@ string rename_file(string from, string to);
 string rtr(string name);
 string help();
 string quit();
+
+void server_socket_init();
+void incoming_connections();
+void incoming_input();
 
 #endif
