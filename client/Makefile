@@ -2,19 +2,15 @@ CC = g++
 FLAGS = -std=c++11 -ljsoncpp
 COMPILE_FLAGS = $(FLAGS) -c 
 
-all: main.out
+all: client
 
-main.out: main.o tools.o
-	$(CC) main.o tools.o $(FLAGS) -o main.out
+client: main.o
+	$(CC) main.o $(FLAGS) -o client
 
-main.o: main.cpp tools.h
+main.o: main.cpp client.h
 	$(CC) $(COMPILE_FLAGS) main.cpp
-
-client.o: client.cpp tools.h
-	$(CC) $(COMPILE_FLAGS) client.cpp
 
 .PHONY: clean
 
 clean:
-				rm *.o
-				rm *.out
+	rm *.o

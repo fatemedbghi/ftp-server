@@ -30,12 +30,12 @@ int main(int argc , char *argv[])
 			if(client_sockets[i] > max_sd) 
 				max_sd = client_sockets[i];
 		} 
-	
+		
 		activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL); 
-	
+		cout << "hi\n";
 		if ((activity < 0) && (errno!=EINTR)) 
 		{ 
-			write(1, "select error", 13); 
+			cout << error;
 		} 
 		
         incoming_connections();
@@ -75,7 +75,7 @@ void server_socket_init(){
         cout << error;
 		exit(EXIT_FAILURE); 
 	}
-    
+
     if (listen(server_socket_1, 100) < 0) 
 	{
         cout << error;
@@ -92,7 +92,7 @@ void incoming_connections(){
     memset(&addr, 0, sizeof(addr));
 
     if (FD_ISSET(server_socket_1, &readfds)) 
-	{ 
+	{
 		if ((new_socket = accept(server_socket_1, (struct sockaddr *)&addr, (socklen_t*)&addrlen))<0) 
 		{ 
 			cout << error;
