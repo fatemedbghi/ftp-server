@@ -28,6 +28,7 @@
 
 #define TRUE 1
 #define False 0
+#define PORT 8888
 #define SERVER_ADDRESS "127.0.0.1"
 
 using namespace std;

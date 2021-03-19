@@ -26,9 +26,12 @@
 #include <stdlib.h>  
 #include <cstdint>
 
+
 #define TRUE   1  
 #define FALSE  0  
 #define CLIENT_ADDRESS "255.255.255.255"
+#define TIMEOUT 20
+#define PORT 8080
 #define SERVER_ADDRESS "127.0.0.1"
 
 using namespace std;
@@ -37,16 +40,7 @@ int client_socket;
 int client_to_sever;
 struct sockaddr_in client_address;
 struct sockaddr_in server_address;
-int port;
-int group_n;
-int id;
-char buffer[1024];
-int turn;
-int hmap[5][4];
-int vmap[4][5];
-int score;
-int move;
-const int server_port = 8000;
+int port, server_port;
 
 void connect_to_server();
 

@@ -1,5 +1,5 @@
 CC = g++
-FLAGS = -std=c++11 -ljsoncpp
+FLAGS = -std=c++11
 COMPILE_FLAGS = $(FLAGS) -c 
 
 all: client
@@ -14,3 +14,4 @@ main.o: main.cpp client.h
 
 clean:
 	rm *.o
+	rm client
