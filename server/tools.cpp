@@ -1,5 +1,8 @@
 #include "tools.h"
 
+map <int, string> client_user;
+map <string, int> user_login;
+
 Json::Value read_json() 
 {
     ifstream file_input("config.json");
@@ -9,12 +12,14 @@ Json::Value read_json()
     return root;
 }
 
-string check_username(string username, Json::Value root)
+string check_username(string username, Json::Value root, int client)
 {
+    cout << username<<endl;
     for (int i=0; i<root["users"].size(); i++)
     {
         if (username.compare(root["users"][i]["user"].asString()) == 0)
         {
+            client_user.insert({client, username});
             return valid_username;
         }
     }
@@ -123,4 +128,21 @@ string quit()
 {
     // logout
     return logout;
+}
+
+string handle_input(string input, int client)
+{
+    vector <string> tokens;
+    stringstream check1(input); 
+    string intermediate; 
+    Json::Value root = read_json();
+    while(getline(check1, intermediate, ' ')) 
+    { 
+        tokens.push_back(intermediate); 
+    } 
+    if (tokens[0].compare(commands[0]) == 0)
+    {
+        return check_username(tokens[1], root, client);
+    }
+    return "";
 }

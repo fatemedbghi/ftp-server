@@ -25,6 +25,8 @@
 #include <fcntl.h>
 #include <stdlib.h>  
 #include <cstdint>
+#include <map>
+#include <vector>
 
 #define TRUE 1
 #define False 0
@@ -55,8 +57,10 @@ struct ls_out {
 
 typedef struct ls_out Struct; 
 
+const vector <string> commands {"user", "pass", "pwd", "mkd", "dele", "ls", "cwd", "rename", "retr", "help", "quit"};
+
 Json::Value read_json();
-string check_username(string username, Json::Value root);
+string check_username(string username, Json::Value root, int client);
 string check_password(string username, string password, Json::Value root);
 string pwd();
 string mkd(string path);
@@ -68,6 +72,8 @@ string rename_file(string from, string to);
 string rtr(string name);
 string help();
 string quit();
+
+string handle_input(string input, int client);
 
 void server_socket_init();
 void incoming_connections();
