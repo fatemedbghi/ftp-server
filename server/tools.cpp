@@ -1,7 +1,7 @@
 #include "tools.h"
 
 map <int, string> client_user;
-map <string, int> user_login;
+vector <int> user_login;
 
 Json::Value read_json() 
 {
@@ -14,28 +14,41 @@ Json::Value read_json()
 
 string check_username(string username, Json::Value root, int client)
 {
-    cout << username<<endl;
     for (int i=0; i<root["users"].size(); i++)
     {
         if (username.compare(root["users"][i]["user"].asString()) == 0)
         {
             client_user.insert({client, username});
+
             return valid_username;
         }
     }
     return invalid;
 }
 
-string check_password(string username, string password, Json::Value root)
+string check_password(int client, string password, Json::Value root)
 {
-    if (username.empty())
+    int flag = 0;
+    string username; 
+    for (map<int, string>::iterator it = client_user.begin(); it != client_user.end(); ++it)
+    {
+        if (it->first == client)
+        {
+            username = it->second;
+            flag = 1;
+            break;
+        }   
+    }
+    if (flag == 0)
     {
         return no_username;
     }
+    
     for (int i=0; i<root["users"].size(); i++)
     {
         if (username.compare(root["users"][i]["user"].asString()) == 0 && password.compare(root["users"][i]["password"].asString()) == 0)
         {
+            user_login.push_back(client);
             return valid_password;
         }
     }
@@ -49,13 +62,22 @@ string pwd()
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
        return direc + cwd + "\n";
     } 
-    return "";
+    return error;
 }
 
 string mkd(string path)
 {
     mkdir(path.c_str(), 0777);
     return "257: " + path + " created.\n";
+}
+
+string delete_sth(string token, string name)
+{
+    if(token.compare("-f") == 0)
+        return delete_file(name);
+    if(token.compare("-d") == 0)
+        return delete_directory(name);
+    return syntax;
 }
 
 string delete_file(string name)
@@ -124,25 +146,108 @@ string help()
     return info;
 }
 
-string quit()
+string quit(int client)
 {
-    // logout
+    client_user.erase(client);
+    user_login.erase(remove(user_login.begin(), user_login.end(), client), user_login.end());
     return logout;
+}
+
+int check_if_logged_in(int client)
+{
+    if(std::find(user_login.begin(), user_login.end(), client) != user_login.end()) 
+        return 1;
+    return 0;
 }
 
 string handle_input(string input, int client)
 {
+    cout << input<<endl;
     vector <string> tokens;
     stringstream check1(input); 
     string intermediate; 
     Json::Value root = read_json();
+
     while(getline(check1, intermediate, ' ')) 
     { 
         tokens.push_back(intermediate); 
     } 
-    if (tokens[0].compare(commands[0]) == 0)
-    {
+
+    if (tokens[0].compare(commands[USER]) == 0)
         return check_username(tokens[1], root, client);
+
+    if (tokens[0].compare(commands[PASS]) == 0)
+        return check_password(client, tokens[1], root);
+    
+    if (tokens[0].compare(commands[PWD]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return pwd();
+        return not_logged_in;
     }
-    return "";
+
+    if (tokens[0].compare(commands[MKD]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return mkd(tokens[1]);
+        return not_logged_in;
+    }
+
+    if (tokens[0].compare(commands[DELE]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return delete_sth(tokens[1], tokens[2]);
+        return not_logged_in;
+    }   
+
+    if (tokens[0].compare(commands[LS]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return ls().list_transfer;
+        return not_logged_in;
+    } 
+
+    if (tokens[0].compare(commands[CWD]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return cwd(tokens[1]);
+        return not_logged_in;
+    }
+
+    if (tokens[0].compare(commands[RENAME]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return rename_file(tokens[1],tokens[2]);
+        return not_logged_in;
+    }
+
+    if (tokens[0].compare(commands[RETR]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return rtr(tokens[1]);
+        return not_logged_in;
+    }
+
+    if (tokens[0].compare(commands[HELP]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return help();
+        return not_logged_in;
+    }
+
+    if (tokens[0].compare(commands[HELP]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return help();
+        return not_logged_in;
+    }
+
+    if (tokens[0].compare(commands[QUIT]) == 0)
+    {
+        if (check_if_logged_in(client) == 1)
+            return quit(client);
+        return not_logged_in;
+    }
+
+    return syntax;
 }

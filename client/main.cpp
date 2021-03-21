@@ -33,14 +33,18 @@ void connect_to_server()
 
     while (TRUE)
     {
-        char input[256];
-        cin >> input;
+        string in;
+        getline(cin, in);
+        char input[2048];
+        memset(input, 0, sizeof input);
+		strcpy(input, in.c_str());
         if (send(client_to_sever, input,  strlen(input), 0) <= 0)
         {
             cout << "500: Error\n";
             return ; 
         }
-        char server_response[256];
+        char server_response[2048];
+        memset(server_response, 0, sizeof server_response);
         if (recv(client_to_sever,&server_response,sizeof(server_response),0) <= 0)
         {
             cout << "500: Error\n";

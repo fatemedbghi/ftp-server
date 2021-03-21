@@ -124,7 +124,8 @@ void incoming_input(){
 		{
 			while (TRUE)
 			{
-				char buffer[1024];
+				char buffer[2048];
+				memset(buffer, 0, sizeof buffer);
 				if(recv(client_sockets[i] , buffer, sizeof(buffer),0) < 0)
 				{
 					cout << error;
@@ -132,7 +133,8 @@ void incoming_input(){
 
 				string input = buffer;
 				string output = handle_input(input, client_sockets[i]);
-				char message[1024];
+				char message[2048];
+				memset(message, 0, sizeof message);
 				strcpy(message, output.c_str());
 				if(send(client_sockets[i], message, strlen(message), 0) < 0) 
 				{ 

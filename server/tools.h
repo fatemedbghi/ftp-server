@@ -27,11 +27,23 @@
 #include <cstdint>
 #include <map>
 #include <vector>
+#include <algorithm>
 
 #define TRUE 1
 #define False 0
 #define PORT 8888
 #define SERVER_ADDRESS "127.0.0.1"
+#define USER 0
+#define PASS 1
+#define PWD 2
+#define MKD 3
+#define DELE 4
+#define LS 5
+#define CWD 6
+#define RENAME 7
+#define RETR 8
+#define HELP 9
+#define QUIT 10
 
 using namespace std;
 
@@ -61,9 +73,10 @@ const vector <string> commands {"user", "pass", "pwd", "mkd", "dele", "ls", "cwd
 
 Json::Value read_json();
 string check_username(string username, Json::Value root, int client);
-string check_password(string username, string password, Json::Value root);
+string check_password(int client, string password, Json::Value root);
 string pwd();
 string mkd(string path);
+string delete_sth(string token, string name);
 string delete_file(string name);
 string delete_directory(string path);
 Struct ls();
@@ -71,9 +84,10 @@ string cwd(string path);
 string rename_file(string from, string to);
 string rtr(string name);
 string help();
-string quit();
+string quit(int client);
 
 string handle_input(string input, int client);
+int check_if_logged_in(int client);
 
 void server_socket_init();
 void incoming_connections();
