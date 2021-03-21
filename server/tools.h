@@ -74,20 +74,21 @@ const vector <string> commands {"user", "pass", "pwd", "mkd", "dele", "ls", "cwd
 Json::Value read_json();
 string check_username(string username, Json::Value root, int client);
 string check_password(int client, string password, Json::Value root);
-string pwd();
-string mkd(string path);
-string delete_sth(string token, string name);
-string delete_file(string name);
-string delete_directory(string path);
-Struct ls();
-string cwd(string path);
-string rename_file(string from, string to);
-string rtr(string name);
+string pwd(int client, map<int,string> c_directory);
+string mkd(string path, int client, map <int, string> c_directory);
+string delete_sth(string token, string name, int client, map<int,string> c_directory);
+string delete_file(string pre, string name);
+string delete_directory(string pre, string path);
+Struct ls(int client, map <int, string> c_directory);
+string cwd(string path, int client, map<int,string> &c_directory);
+string rename_file(string from, string to, int client, map<int,string> c_directory);
+string rtr(string name, int client, map<int,string> c_directory);
 string help();
-string quit(int client);
+string quit(int client, map <int, string> &c_directory);
 
-string handle_input(string input, int client);
+string handle_input(string input, int client, map<int,string> &c_directory);
 int check_if_logged_in(int client);
+fstream create_log();
 
 void server_socket_init();
 void incoming_connections();

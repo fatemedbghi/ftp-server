@@ -31,11 +31,19 @@ void connect_to_server()
         return ;
 	}
 
+    char input[2048];
+    memset(input, 0, sizeof input);
+	strcpy(input, pwd().c_str());
+    if (send(client_to_sever, input,  strlen(input), 0) <= 0)
+    {
+        cout << "500: Error\n";
+        return ; 
+    }
+
     while (TRUE)
     {
         string in;
         getline(cin, in);
-        char input[2048];
         memset(input, 0, sizeof input);
 		strcpy(input, in.c_str());
         if (send(client_to_sever, input,  strlen(input), 0) <= 0)
@@ -52,6 +60,14 @@ void connect_to_server()
         }
         cout << server_response;
     }
-    
 
+}
+
+string pwd()
+{
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+       return cwd;
+    }
+    return "";
 }

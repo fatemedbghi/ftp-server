@@ -43,5 +43,6 @@ struct sockaddr_in server_address;
 int port, server_port;
 
 void connect_to_server();
+string pwd();
 
 #endif

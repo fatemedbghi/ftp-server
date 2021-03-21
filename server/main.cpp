@@ -6,13 +6,14 @@ int client_sockets[30];
 fd_set readfds;
 int port;
 int max_clients = 30;
+map <int, string> c_directory;
 
 int main(int argc , char *argv[]) 
 {
 	port = atoi(argv[1]);
 	int activity,i; 
 	int max_sd;
-
+	
     server_socket_init();
 
 	while(TRUE) 
@@ -122,9 +123,17 @@ void incoming_input(){
 	{
 		if (FD_ISSET( client_sockets[i] , &readfds)) 
 		{
+			char buffer[2048];
+			memset(buffer, 0, sizeof buffer);
+			if(recv(client_sockets[i] , buffer, sizeof(buffer),0) < 0)
+			{
+				cout << error;
+			}
+
+			c_directory.insert({client_sockets[i],buffer});
+
 			while (TRUE)
 			{
-				char buffer[2048];
 				memset(buffer, 0, sizeof buffer);
 				if(recv(client_sockets[i] , buffer, sizeof(buffer),0) < 0)
 				{
@@ -132,7 +141,7 @@ void incoming_input(){
 				}
 
 				string input = buffer;
-				string output = handle_input(input, client_sockets[i]);
+				string output = handle_input(input, client_sockets[i], c_directory);
 				char message[2048];
 				memset(message, 0, sizeof message);
 				strcpy(message, output.c_str());

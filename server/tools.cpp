@@ -49,54 +49,63 @@ string check_password(int client, string password, Json::Value root)
         if (username.compare(root["users"][i]["user"].asString()) == 0 && password.compare(root["users"][i]["password"].asString()) == 0)
         {
             user_login.push_back(client);
+            fstream file = create_log();
+            time_t my_time = time(NULL); 
+            file << "user " + username + " logged in: " + ctime(&my_time) << "\n";
             return valid_password;
         }
     }
     return invalid;
 }
 
-string pwd()
+string pwd(int client, map <int, string> c_directory)
 {
     char cwd[PATH_MAX];
-    string direc = "257: ";
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-       return direc + cwd + "\n";
-    } 
-    return error;
+    string direc = "257: " + c_directory[client] + "\n";
+    return direc;
 }
 
-string mkd(string path)
+string mkd(string path, int client, map <int, string> c_directory)
 {
-    mkdir(path.c_str(), 0777);
+    mkdir((c_directory[client] + "/" + path).c_str(), 0777);
+    fstream file = create_log();
+    time_t my_time = time(NULL); 
+    file << "directory " + path + " created by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
     return "257: " + path + " created.\n";
 }
 
-string delete_sth(string token, string name)
+string delete_sth(string token, string name, int client, map <int, string> c_directory)
 {
     if(token.compare("-f") == 0)
-        return delete_file(name);
+        return delete_file(c_directory[client]+"/", name);
     if(token.compare("-d") == 0)
-        return delete_directory(name);
+        return delete_directory(c_directory[client]+"/", name);
+    fstream file = create_log();
+    time_t my_time = time(NULL); 
+    file << name + " deleted by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
     return syntax;
 }
 
-string delete_file(string name)
+string delete_file(string pre, string name)
 {
-    unlink(name.c_str());
+    string p = pre + name;
+    unlink(p.c_str());
     return "250: " + name + " deleted.\n";
 }
 
-string delete_directory(string path)
-{
-    rmdir(path.c_str());
+string delete_directory(string pre, string path)
+{   
+    string p = pre + path;
+    rmdir(p.c_str());
     return "250: " + path + " deleted.\n";
 }
 
-Struct ls()
+Struct ls(int client, map <int, string> c_directory)
 {
     Struct out;
+    string c = c_directory[client];
     char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
+    strcpy(cwd, c.c_str());
     DIR *dir;
     struct dirent *ent;
     if ((dir = opendir(cwd)) != NULL) {
@@ -111,21 +120,42 @@ Struct ls()
     return out;
 }
 
-string cwd(string path)
+string cwd(string path, int client, map<int,string> &c_directory)
 {
-    chdir(path.c_str());
+    if (path.compare("..") == 0)
+    {
+        vector <string> tokens;
+        stringstream check1(c_directory[client]);
+        string intermediate; 
+        while(getline(check1, intermediate, '/')) 
+        {
+            tokens.push_back(intermediate); 
+        }
+        string new_path = "";
+        for (int i=1; i<tokens.size()-1;i++)
+            new_path = new_path + "/" + tokens[i];
+        c_directory[client] = new_path;
+    }
+    else
+        c_directory[client] = c_directory[client] + "/" + path;
     return change;
 }
 
-string rename_file(string from, string to)
+string rename_file(string from, string to, int client, map<int,string> c_directory)
 {
-    rename(from.c_str(), to.c_str());
+    rename((c_directory[client]+"/"+ from).c_str(), (c_directory[client]+"/"+ to).c_str());
+    fstream file = create_log();
+    time_t my_time = time(NULL); 
+    file << from + " renamed to " + to + " by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
     return change;
 }
 
-string rtr(string name)
+string rtr(string name, int client, map<int,string> c_directory)
 {
     //download
+    fstream file = create_log();
+    time_t my_time = time(NULL); 
+    file << "file " + name + " downloaded by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
     return download_st;
 }
 
@@ -146,9 +176,10 @@ string help()
     return info;
 }
 
-string quit(int client)
+string quit(int client, map <int, string> &c_directory)
 {
     client_user.erase(client);
+    c_directory.erase(client);
     user_login.erase(remove(user_login.begin(), user_login.end(), client), user_login.end());
     return logout;
 }
@@ -160,9 +191,15 @@ int check_if_logged_in(int client)
     return 0;
 }
 
-string handle_input(string input, int client)
+fstream create_log()
 {
-    cout << input<<endl;
+    fstream file;
+    file.open("log", ios_base::app);
+    return file;
+}
+
+string handle_input(string input, int client, map<int,string> &c_directory)
+{
     vector <string> tokens;
     stringstream check1(input); 
     string intermediate; 
@@ -182,49 +219,49 @@ string handle_input(string input, int client)
     if (tokens[0].compare(commands[PWD]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return pwd();
+            return pwd(client, c_directory);
         return not_logged_in;
     }
 
     if (tokens[0].compare(commands[MKD]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return mkd(tokens[1]);
+            return mkd(tokens[1], client, c_directory);
         return not_logged_in;
     }
 
     if (tokens[0].compare(commands[DELE]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return delete_sth(tokens[1], tokens[2]);
+            return delete_sth(tokens[1], tokens[2], client, c_directory);
         return not_logged_in;
     }   
 
     if (tokens[0].compare(commands[LS]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return ls().list_transfer;
+            return ls(client, c_directory).list_transfer;
         return not_logged_in;
     } 
 
     if (tokens[0].compare(commands[CWD]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return cwd(tokens[1]);
+            return cwd(tokens[1], client, c_directory);
         return not_logged_in;
     }
 
     if (tokens[0].compare(commands[RENAME]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return rename_file(tokens[1],tokens[2]);
+            return rename_file(tokens[1],tokens[2], client, c_directory);
         return not_logged_in;
     }
 
     if (tokens[0].compare(commands[RETR]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return rtr(tokens[1]);
+            return rtr(tokens[1], client, c_directory);
         return not_logged_in;
     }
 
@@ -245,7 +282,7 @@ string handle_input(string input, int client)
     if (tokens[0].compare(commands[QUIT]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return quit(client);
+            return quit(client, c_directory);
         return not_logged_in;
     }
 
