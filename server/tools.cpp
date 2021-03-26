@@ -2,6 +2,7 @@
 
 map <int, string> client_user;
 vector <int> user_login;
+vector <int> user_admin;
 
 Json::Value read_json() 
 {
@@ -52,6 +53,9 @@ string check_password(int client, string password, Json::Value root)
             fstream file = create_log();
             time_t my_time = time(NULL); 
             file << "user " + username + " logged in: " + ctime(&my_time) << "\n";
+            string tr = "true";
+            if (tr.compare(root["users"][i]["admin"].asString()) == 0)
+                user_admin.push_back(client);
             return valid_password;
         }
     }
@@ -181,6 +185,7 @@ string quit(int client, map <int, string> &c_directory)
     client_user.erase(client);
     c_directory.erase(client);
     user_login.erase(remove(user_login.begin(), user_login.end(), client), user_login.end());
+    user_admin.erase(remove(user_admin.begin(), user_admin.end(), client), user_admin.end());
     return logout;
 }
 
@@ -198,12 +203,33 @@ fstream create_log()
     return file;
 }
 
+vector<string> unaccessed_files(Json::Value root)
+{
+    vector<string> files;
+    for (int i=0; i<root["files"].size(); i++)
+    {
+        files.push_back(root["files"][i].asString());
+    }
+    return files;
+}
+
+int check_if_file_accessed(int client, vector<string> files, string file_name)
+{
+    if (std::find(files.begin(), files.end(), file_name) != files.end())
+        if(std::find(user_admin.begin(), user_admin.end(), client) != user_admin.end()) 
+            return 1;
+        else
+            return 0;
+    return 1;
+}
+
 string handle_input(string input, int client, map<int,string> &c_directory)
 {
     vector <string> tokens;
     stringstream check1(input); 
     string intermediate; 
     Json::Value root = read_json();
+    vector <string> files = unaccessed_files(root);
 
     while(getline(check1, intermediate, ' ')) 
     { 
@@ -233,7 +259,12 @@ string handle_input(string input, int client, map<int,string> &c_directory)
     if (tokens[0].compare(commands[DELE]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return delete_sth(tokens[1], tokens[2], client, c_directory);
+        {
+            if (check_if_file_accessed(client, files, tokens[2]) == 1)
+                return delete_sth(tokens[1], tokens[2], client, c_directory);
+            return illegal_access;
+
+        }
         return not_logged_in;
     }   
 
@@ -254,14 +285,22 @@ string handle_input(string input, int client, map<int,string> &c_directory)
     if (tokens[0].compare(commands[RENAME]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return rename_file(tokens[1],tokens[2], client, c_directory);
+        {
+            if (check_if_file_accessed(client, files, tokens[1]) == 1)
+                return rename_file(tokens[1],tokens[2], client, c_directory);
+            return illegal_access;
+        }
         return not_logged_in;
     }
 
     if (tokens[0].compare(commands[RETR]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return rtr(tokens[1], client, c_directory);
+        {
+            if (check_if_file_accessed(client, files, tokens[1]) == 1)
+                return rtr(tokens[1], client, c_directory);
+            return illegal_access;
+        }
         return not_logged_in;
     }
 
@@ -271,14 +310,7 @@ string handle_input(string input, int client, map<int,string> &c_directory)
             return help();
         return not_logged_in;
     }
-
-    if (tokens[0].compare(commands[HELP]) == 0)
-    {
-        if (check_if_logged_in(client) == 1)
-            return help();
-        return not_logged_in;
-    }
-
+    
     if (tokens[0].compare(commands[QUIT]) == 0)
     {
         if (check_if_logged_in(client) == 1)

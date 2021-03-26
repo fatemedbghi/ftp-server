@@ -72,6 +72,7 @@ typedef struct ls_out Struct;
 const vector <string> commands {"user", "pass", "pwd", "mkd", "dele", "ls", "cwd", "rename", "retr", "help", "quit"};
 
 Json::Value read_json();
+vector<string> unaccessed_files(Json::Value root);
 string check_username(string username, Json::Value root, int client);
 string check_password(int client, string password, Json::Value root);
 string pwd(int client, map<int,string> c_directory);
@@ -88,6 +89,7 @@ string quit(int client, map <int, string> &c_directory);
 
 string handle_input(string input, int client, map<int,string> &c_directory);
 int check_if_logged_in(int client);
+int check_if_file_accessed(int client, vector<string> files, string file_name);
 fstream create_log();
 
 void server_socket_init();
