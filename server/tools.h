@@ -87,12 +87,13 @@ string rtr(string name, int client, map<int,string> c_directory);
 string help();
 string quit(int client, map <int, string> &c_directory);
 
+string get_file_content(string name);
 string handle_input(string input, int client, map<int,string> &c_directory);
 int check_if_logged_in(int client);
 int check_if_file_accessed(int client, vector<string> files, string file_name);
 fstream create_log();
 
-void server_socket_init();
+void server_socket_init(int port);
 void incoming_connections();
 void incoming_input();
 

@@ -5,16 +5,19 @@ struct sockaddr_in address;
 int client_sockets[30];
 fd_set readfds;
 int port;
+int data_port;
 int max_clients = 30;
 map <int, string> c_directory;
 
 int main(int argc , char *argv[]) 
 {
 	port = atoi(argv[1]);
+	data_port = atoi(argv[2]);
 	int activity,i; 
 	int max_sd;
 	
-    server_socket_init();
+    server_socket_init(port);
+	// server_socket_init(data_port);
 
 	while(TRUE) 
 	{
@@ -46,7 +49,7 @@ int main(int argc , char *argv[])
 	return 0; 
 } 
 
-void server_socket_init(){
+void server_socket_init(int port){
     
     int i;
     for (i = 0; i < max_clients; i++) 

@@ -154,8 +154,31 @@ string rename_file(string from, string to, int client, map<int,string> c_directo
     return change;
 }
 
+
+string get_file_content(string name)
+{
+
+    string content;
+    string line = "";
+
+    ifstream read_file(name);
+
+
+    while (getline (read_file, line))
+    {
+        content += line;
+
+    }
+
+    read_file.close(); 
+    return content;
+}
+
+
 string rtr(string name, int client, map<int,string> c_directory)
 {
+    
+    string file_content = get_file_content((c_directory[client]+"/"+ name).c_str());
     //download
     fstream file = create_log();
     time_t my_time = time(NULL); 
