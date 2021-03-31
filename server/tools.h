@@ -44,6 +44,7 @@
 #define RETR 8
 #define HELP 9
 #define QUIT 10
+#define max_clients 30
 
 using namespace std;
 
@@ -63,7 +64,8 @@ const string error = "500: Error\n";
 const string data = "425: Can't open data connection.";
 
 struct ls_out { 
-    vector <string> list;
+    // vector <string> list;
+    string list;
     string list_transfer = "226: List transfer done.\n";
 }; 
 
@@ -80,21 +82,23 @@ string mkd(string path, int client, map <int, string> c_directory);
 string delete_sth(string token, string name, int client, map<int,string> c_directory);
 string delete_file(string pre, string name);
 string delete_directory(string pre, string path);
-Struct ls(int client, map <int, string> c_directory);
+Struct ls(int client, int data_channel, map <int, string> c_directory);
 string cwd(string path, int client, map<int,string> &c_directory);
 string rename_file(string from, string to, int client, map<int,string> c_directory);
-string rtr(string name, int client, map<int,string> c_directory);
+string rtr(string name, int client, int data_channel, map<int,string> c_directory);
 string help();
 string quit(int client, map <int, string> &c_directory);
 
 string get_file_content(string name);
-string handle_input(string input, int client, map<int,string> &c_directory);
+string handle_input(string input, int client,int data_channel, map<int,string> &c_directory);
 int check_if_logged_in(int client);
 int check_if_file_accessed(int client, vector<string> files, string file_name);
 fstream create_log();
+int send_data_to_client(int client, string data);
 
-void server_socket_init(int port);
-void incoming_connections();
+
+int server_socket_init(int port, sockaddr_in address);
+void incoming_connections(int server_socket, int client_sockets[max_clients]);
 void incoming_input();
 
 #endif

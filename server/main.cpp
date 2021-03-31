@@ -2,11 +2,13 @@
 
 int server_socket;
 struct sockaddr_in address;
-int client_sockets[30];
+struct sockaddr_in data_address;
+int client_sockets[max_clients];
+int client_data[max_clients];
 fd_set readfds;
+fd_set datafds;
 int port;
 int data_port;
-int max_clients = 30;
 map <int, string> c_directory;
 
 int main(int argc , char *argv[]) 
@@ -15,16 +17,21 @@ int main(int argc , char *argv[])
 	data_port = atoi(argv[2]);
 	int activity,i; 
 	int max_sd;
+	int max_data_sd;
 	
-    server_socket_init(port);
-	// server_socket_init(data_port);
+    int server_socket = server_socket_init(port, address);
+	int data_socket = server_socket_init(data_port, data_address);
 
 	while(TRUE) 
 	{
 		FD_ZERO(&readfds); 
 		FD_SET(server_socket, &readfds); 
 
+		FD_ZERO(&datafds); 
+		FD_SET(data_socket, &datafds); 
+
 		max_sd = server_socket; 
+		
 			
 		for ( i = 0 ; i < max_clients ; i++) 
 		{ 	
@@ -36,20 +43,26 @@ int main(int argc , char *argv[])
 		} 
 	
 		activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL); 
-	
+		// select data?
+
+
 		if ((activity < 0) && (errno!=EINTR)) 
 		{ 
 			cout << error;
 		} 
-		
-        incoming_connections();
+
+        incoming_connections(server_socket,client_sockets);
+		incoming_connections(data_socket,client_data);
         incoming_input();
 	} 
 		
 	return 0; 
 } 
 
-void server_socket_init(int port){
+
+int server_socket_init(int port, sockaddr_in address){
+
+	int server_socket;
     
     int i;
     for (i = 0; i < max_clients; i++) 
@@ -86,9 +99,11 @@ void server_socket_init(int port){
 		exit(EXIT_FAILURE); 
 	} 
 
+	return server_socket;
+
 }
 
-void incoming_connections(){
+void incoming_connections(int server_socket, int client_sockets[max_clients]){
 
     int new_socket, i, addrlen;
     struct sockaddr_in addr;
@@ -144,7 +159,7 @@ void incoming_input(){
 				}
 
 				string input = buffer;
-				string output = handle_input(input, client_sockets[i], c_directory);
+				string output = handle_input(input, client_sockets[i], client_data[i], c_directory);
 				char message[2048];
 				memset(message, 0, sizeof message);
 				strcpy(message, output.c_str());

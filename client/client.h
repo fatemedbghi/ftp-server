@@ -28,21 +28,26 @@
 
 
 #define TRUE   1  
+#define ERROR -1
 #define FALSE  0  
 #define CLIENT_ADDRESS "255.255.255.255"
 #define TIMEOUT 20
 #define PORT 8080
 #define SERVER_ADDRESS "127.0.0.1"
+#define LS "ls"
+#define RETR "retr"
 
 using namespace std;
 
 int client_socket;
-int client_to_sever;
+int client_to_server;
+int data_channel;
 struct sockaddr_in client_address;
 struct sockaddr_in server_address;
-int port, server_port;
+int data_port, server_port;
 
-void connect_to_server();
+int connect_to_server(int port, sockaddr_in address);
+void interact_with_server();
 string pwd();
 
 #endif

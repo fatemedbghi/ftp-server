@@ -104,7 +104,7 @@ string delete_directory(string pre, string path)
     return "250: " + path + " deleted.\n";
 }
 
-Struct ls(int client, map <int, string> c_directory)
+Struct ls(int client, int data_channel, map <int, string> c_directory)
 {
     Struct out;
     string c = c_directory[client];
@@ -116,11 +116,14 @@ Struct ls(int client, map <int, string> c_directory)
       while ((ent = readdir (dir)) != NULL) {
         if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
         {
-            out.list.push_back(ent->d_name);
+            // out.list.push_back(ent->d_name);
+            out.list += ent->d_name;
+            out.list += ',';
         }
       }
       closedir (dir);
     }
+    send_data_to_client(data_channel,out.list);
     return out;
 }
 
@@ -163,7 +166,6 @@ string get_file_content(string name)
 
     ifstream read_file(name);
 
-
     while (getline (read_file, line))
     {
         content += line;
@@ -175,10 +177,11 @@ string get_file_content(string name)
 }
 
 
-string rtr(string name, int client, map<int,string> c_directory)
+string rtr(string name, int client, int data_channel, map<int,string> c_directory)
 {
     
     string file_content = get_file_content((c_directory[client]+"/"+ name).c_str());
+    send_data_to_client(data_channel,file_content);
     //download
     fstream file = create_log();
     time_t my_time = time(NULL); 
@@ -246,7 +249,23 @@ int check_if_file_accessed(int client, vector<string> files, string file_name)
     return 1;
 }
 
-string handle_input(string input, int client, map<int,string> &c_directory)
+
+int send_data_to_client(int client, string data)
+{
+    char message[2048];
+    memset(message, 0, sizeof message);
+    strcpy(message, data.c_str());
+    if(send(client, message, strlen(message), 0) < 0) 
+    { 
+        cout << error +" in sending data";
+        return False;
+    }
+			cout<<"hey";
+	return TRUE;	
+}
+
+
+string handle_input(string input, int client, int data_channel, map<int,string> &c_directory)
 {
     vector <string> tokens;
     stringstream check1(input); 
@@ -294,7 +313,7 @@ string handle_input(string input, int client, map<int,string> &c_directory)
     if (tokens[0].compare(commands[LS]) == 0)
     {
         if (check_if_logged_in(client) == 1)
-            return ls(client, c_directory).list_transfer;
+            return ls(client, data_channel, c_directory).list_transfer;
         return not_logged_in;
     } 
 
@@ -321,7 +340,7 @@ string handle_input(string input, int client, map<int,string> &c_directory)
         if (check_if_logged_in(client) == 1)
         {
             if (check_if_file_accessed(client, files, tokens[1]) == 1)
-                return rtr(tokens[1], client, c_directory);
+                return rtr(tokens[1], client, data_channel, c_directory);
             return illegal_access;
         }
         return not_logged_in;
