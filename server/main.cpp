@@ -40,6 +40,12 @@ int main(int argc , char *argv[])
 
 			if(client_sockets[i] > max_sd) 
 				max_sd = client_sockets[i];
+
+			if(client_data[i] > 0) 
+				FD_SET(client_data[i] , &datafds);
+
+			if(client_data[i] > max_data_sd) 
+				max_data_sd = client_data[i];
 		} 
 	
 		activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL); 
