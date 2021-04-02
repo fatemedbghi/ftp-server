@@ -1,13 +1,12 @@
 #include "tools.h"
 
 fd_set readfds;
-fd_set datafds;
 
 int main(int argc , char *argv[]) 
 {
 	int port = atoi(argv[1]);
 	int data_port = atoi(argv[2]);
-	int activity1,activity2,i; 
+	int activity,i; 
 	int max_sd;
 	int max_data_sd;
 	struct sockaddr_in address;
@@ -24,9 +23,6 @@ int main(int argc , char *argv[])
 		FD_ZERO(&readfds); 
 		FD_SET(server_socket, &readfds); 
 
-		FD_ZERO(&datafds); 
-		FD_SET(data_socket, &datafds); 
-
 		max_sd = server_socket; 
 		max_data_sd = data_socket;
 			
@@ -37,24 +33,16 @@ int main(int argc , char *argv[])
 
 			if(client_sockets[i] > max_sd) 
 				max_sd = client_sockets[i];
-
-			if(client_data[i] > 0) 
-				FD_SET(client_data[i] , &datafds);
-
-			if(client_data[i] > max_data_sd) 
-				max_data_sd = client_data[i];
 		} 
 	
-		activity1 = select( max_sd + 1 , &readfds , NULL , NULL , NULL); 
-		activity2 = select( max_data_sd + 1 , &datafds , NULL , NULL , NULL); 
+		activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL); 
 
-		if (((activity1 < 0) || (activity2<0)) && (errno!=EINTR)) 
+		if ((activity < 0) && (errno!=EINTR)) 
 		{ 
 			cout << error;
 		}
 
-        incoming_connections(server_socket, client_sockets, 1);
-		incoming_connections(data_socket, client_data, 2);
+        incoming_connections(server_socket, client_sockets, data_socket, client_data);
         incoming_input(client_sockets, client_data);
 	} 
 		
@@ -97,55 +85,39 @@ int server_socket_init(int port){
 	return server_socket;
 }
 
-int* incoming_connections(int server_socket, int* client_sockets, int cOrd){
+void incoming_connections(int server_socket, int* client_sockets, int data_socket, int *client_data){
 
-    int new_socket, i, addrlen;
-    struct sockaddr_in addr;
-    addrlen = sizeof(addr);
-    memset(&addr, 0, sizeof(addr));
+    int new_socket1, new_socket2, i, addrlen;
+    struct sockaddr_in addr1, addr2;
+    addrlen = sizeof(addr1);
+    memset(&addr1, 0, sizeof(addr1));
+	memset(&addr2, 0, sizeof(addr2));
 
-	if (cOrd == 1)
-	{
-		if (FD_ISSET(server_socket, &readfds)) 
+	if (FD_ISSET(server_socket, &readfds)) 
+	{ 
+		if ((new_socket1 = accept(server_socket, (struct sockaddr *)&addr1, (socklen_t*)&addrlen))<0) 
 		{ 
-			if ((new_socket = accept(server_socket, (struct sockaddr *)&addr, (socklen_t*)&addrlen))<0) 
-			{ 
-				cout << error;
-				exit(EXIT_FAILURE); 
-			} 
-
-			for (i = 0; i < max_clients; i++) 
+			cout << error;
+			exit(EXIT_FAILURE); 
+		}
+		if ((new_socket2 = accept(data_socket, (struct sockaddr *)&addr2, (socklen_t*)&addrlen))<0) 
+		{ 
+			cout << error;
+			exit(EXIT_FAILURE); 
+		}
+		for (i = 0; i < max_clients; i++) 
+		{
+			if(client_sockets[i] == 0 ) 
 			{
-				if( client_sockets[i] == 0 ) 
-				{
-					client_sockets[i] = new_socket; 
-					break; 
-				} 
+				client_sockets[i] = new_socket1; 
 			}
+			if(client_data[i] == 0)
+			{
+				client_data[i] = new_socket2;
+			} 
 		}
 	}
-	// if (cOrd == 2)
-	// {
-	// 	if (FD_ISSET(server_socket, &datafds)) 
-	// 	{ 
-	// 		if ((new_socket = accept(server_socket, (struct sockaddr *)&addr, (socklen_t*)&addrlen))<0) 
-	// 		{ 
-	// 			cout << error;
-	// 			exit(EXIT_FAILURE); 
-	// 		} 
-
-	// 		for (i = 0; i < max_clients; i++) 
-	// 		{
-	// 			if( client_sockets[i] == 0 ) 
-	// 			{
-	// 				client_sockets[i] = new_socket; 
-	// 				break; 
-	// 			} 
-	// 		}
-	// 	}
-	// }
     
-	return client_sockets;
 }
 
 void incoming_input(int* client_sockets, int* client_data){
@@ -158,10 +130,8 @@ void incoming_input(int* client_sockets, int* client_data){
 	
 	for (i = 0; i < max_clients; i++) 
 	{
-		cout << "hiii\n";
 		if (FD_ISSET( client_sockets[i] , &readfds)) 
 		{
-			cout << "byyyyyyye\n";
 			char buffer[2048];
 			memset(buffer, 0, sizeof buffer);
 			

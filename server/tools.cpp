@@ -255,10 +255,9 @@ int send_data_to_client(int client, string data)
     char message[2048];
     memset(message, 0, sizeof message);
     strcpy(message, data.c_str());
-
     if(send(client, message, strlen(message), 0) < 0) 
     { 
-        cout << error +" in sending data";
+        cout << error;
         return False;
     }
 	return TRUE;	

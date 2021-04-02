@@ -97,7 +97,7 @@ fstream create_log();
 int send_data_to_client(int client, string data);
 
 int server_socket_init(int port);
-int* incoming_connections(int server_socket, int* client_sockets, int cOrd);
+void incoming_connections(int server_socket, int* client_sockets, int data_socket, int *client_data);
 void incoming_input(int* client_sockets, int* client_data);
 
 #endif

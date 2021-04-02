@@ -70,6 +70,7 @@ void interact_with_server(int client_to_server, int data_channel)
         if (token.compare(LS) == 0 || token.compare(RETR) == 0)
         {
             char response_data[2048];
+            memset(response_data, 0, sizeof(response_data));
             if (recv(data_channel, &response_data,sizeof(response_data),0) <= 0)
             {
                 cout << "500: Error\n";
