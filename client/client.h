@@ -42,12 +42,10 @@ using namespace std;
 int client_socket;
 int client_to_server;
 int data_channel;
-struct sockaddr_in client_address;
-struct sockaddr_in server_address;
 int data_port, server_port;
 
-int connect_to_server(int port, sockaddr_in address);
-void interact_with_server();
+int connect_to_server(int port);
+void interact_with_server(int client_to_server, int data_channel);
 string pwd();
 
 #endif

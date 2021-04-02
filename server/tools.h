@@ -96,9 +96,8 @@ int check_if_file_accessed(int client, vector<string> files, string file_name);
 fstream create_log();
 int send_data_to_client(int client, string data);
 
-
-int server_socket_init(int port, sockaddr_in address);
-void incoming_connections(int server_socket, int client_sockets[max_clients]);
-void incoming_input();
+int server_socket_init(int port);
+int* incoming_connections(int server_socket, int* client_sockets, int cOrd);
+void incoming_input(int* client_sockets, int* client_data);
 
 #endif

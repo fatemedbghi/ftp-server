@@ -4,19 +4,15 @@ int main(int argc , char *argv[])
 {
     server_port = atoi(argv[1]);
     data_port = atoi(argv[2]);
-    
-    client_to_server = connect_to_server(server_port, server_address);
+    client_to_server = connect_to_server(server_port);
+    data_channel = connect_to_server(data_port);
 
-    data_channel = connect_to_server(data_port, server_address);
-
-    interact_with_server();
+    interact_with_server(client_to_server, data_channel);
 
     return 0;
 }
 
-
-
-int connect_to_server(int port, sockaddr_in address)
+int connect_to_server(int port)
 {
     int sock;
     if( (sock = socket( AF_INET , SOCK_STREAM, 0)) < 0 )
@@ -24,7 +20,7 @@ int connect_to_server(int port, sockaddr_in address)
         cout << "500: Error\n";
         return ERROR;
     }
-
+    struct sockaddr_in address;
     address.sin_family = AF_INET; 
 	address.sin_port = htons(port); 
 
@@ -38,16 +34,16 @@ int connect_to_server(int port, sockaddr_in address)
 		cout << "500: Error\n";
         return ERROR;
 	}
+    // cout <<"baaaaa\n";
     return sock;
-
 }
 
-void interact_with_server()
+void interact_with_server(int client_to_server, int data_channel)
 {
     char input[2048];
     memset(input, 0, sizeof(input));
 	strcpy(input, pwd().c_str());
-    // cout<<pwd();
+
     if (send(client_to_server, input,  strlen(input), 0) <= 0)
     {
         cout << "500: Error\n";
@@ -60,7 +56,6 @@ void interact_with_server()
         getline(cin, in);
         memset(input, 0, sizeof(input));
 		strcpy(input, in.c_str());
-
         
         if (send(client_to_server, input,  strlen(input), 0) <= 0)
         {
@@ -71,14 +66,11 @@ void interact_with_server()
         istringstream ss(in);
         string token;
         ss >> token;
-        
-
+       
         if (token.compare(LS) == 0 || token.compare(RETR) == 0)
         {
-            cout << data_channel<<endl;
-
             char response_data[2048];
-            if (recv(data_channel,&response_data,sizeof(response_data),0) <= 0)
+            if (recv(data_channel, &response_data,sizeof(response_data),0) <= 0)
             {
                 cout << "500: Error\n";
                 return ; 
