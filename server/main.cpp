@@ -1,6 +1,7 @@
 #include "tools.h"
 
 fd_set readfds;
+map <int, string> c_directory;
 
 int main(int argc , char *argv[]) 
 {
@@ -110,11 +111,9 @@ void incoming_connections(int server_socket, int* client_sockets, int data_socke
 			if(client_sockets[i] == 0 ) 
 			{
 				client_sockets[i] = new_socket1; 
-			}
-			if(client_data[i] == 0)
-			{
 				client_data[i] = new_socket2;
-			} 
+				break;
+			}
 		}
 	}
     
@@ -123,7 +122,6 @@ void incoming_connections(int server_socket, int* client_sockets, int data_socke
 void incoming_input(int* client_sockets, int* client_data){
 
     int new_socket, i, addrlen;
-	map <int, string> c_directory;
     struct sockaddr_in addr;
     addrlen = sizeof(addr);
     memset(&addr, 0, sizeof(addr));
@@ -133,26 +131,26 @@ void incoming_input(int* client_sockets, int* client_data){
 		if (FD_ISSET( client_sockets[i] , &readfds)) 
 		{
 			char buffer[2048];
+			char message[2048];
 			memset(buffer, 0, sizeof buffer);
-			
 			if(recv(client_sockets[i] , buffer, sizeof(buffer),0) < 0)
 			{
 				cout << error;
 			}
 
-			c_directory.insert({client_sockets[i],buffer});
-
-			while (TRUE)
+			if (c_directory.find(client_sockets[i]) == c_directory.end())
 			{
-				memset(buffer, 0, sizeof buffer);
-				if(recv(client_sockets[i] , buffer, sizeof(buffer),0) < 0)
-				{
+				c_directory.insert({client_sockets[i],buffer});
+				memset(message, 0, sizeof message);
+				if(send(client_sockets[i], message, strlen(message), 0) < 0) 
+				{ 
 					cout << error;
 				}
-
+			}
+			else
+			{
 				string input = buffer;
 				string output = handle_input(input, client_sockets[i], client_data[i], c_directory);
-				char message[2048];
 				memset(message, 0, sizeof message);
 				strcpy(message, output.c_str());
 				if(send(client_sockets[i], message, strlen(message), 0) < 0) 
@@ -160,7 +158,6 @@ void incoming_input(int* client_sockets, int* client_data){
 					cout << error;
 				}
 			}
-		
 		} 
 	} 
 }

@@ -34,7 +34,7 @@ int connect_to_server(int port)
 		cout << "500: Error\n";
         return ERROR;
 	}
-    // cout <<"baaaaa\n";
+
     return sock;
 }
 
