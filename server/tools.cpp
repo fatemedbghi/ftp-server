@@ -1,6 +1,7 @@
 #include "tools.h"
 
 map <int, string> client_user;
+map <int, int> size;
 vector <int> user_login;
 vector <int> user_admin;
 
@@ -56,6 +57,7 @@ string check_password(int client, string password, Json::Value root)
             string tr = "true";
             if (tr.compare(root["users"][i]["admin"].asString()) == 0)
                 user_admin.push_back(client);
+            size.insert({client, 1000*stoi(root["users"][i]["size"].asString())});
             return valid_password;
         }
     }
@@ -80,13 +82,16 @@ string mkd(string path, int client, map <int, string> c_directory)
 
 string delete_sth(string token, string name, int client, map <int, string> c_directory)
 {
-    if(token.compare("-f") == 0)
-        return delete_file(c_directory[client]+"/", name);
-    if(token.compare("-d") == 0)
-        return delete_directory(c_directory[client]+"/", name);
-    fstream file = create_log();
-    time_t my_time = time(NULL); 
-    file << name + " deleted by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
+    if (token.compare("-f") == 0 || token.compare("-d") == 0)
+    {
+        fstream file = create_log();
+        time_t my_time = time(NULL); 
+        file << name + " deleted by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
+        if(token.compare("-f") == 0)
+            return delete_file(c_directory[client]+"/", name);
+        if(token.compare("-d") == 0)
+            return delete_directory(c_directory[client]+"/", name);
+    }
     return syntax;
 }
 
@@ -120,7 +125,8 @@ Struct ls(int client, int data_channel, map <int, string> c_directory)
             out.list += ent->d_name;
             out.list += ',';
         }
-      }
+        }
+      out.list += '\n';
       closedir (dir);
     }
     send_data_to_client(data_channel,out.list);
@@ -145,6 +151,9 @@ string cwd(string path, int client, map<int,string> &c_directory)
     }
     else
         c_directory[client] = c_directory[client] + "/" + path;
+    fstream file = create_log();
+    time_t my_time = time(NULL); 
+    file << "directory " + path + " changed to " + c_directory[client] + " by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
     return change;
 }
 
@@ -173,20 +182,34 @@ string get_file_content(string name)
     }
 
     read_file.close(); 
-    return content;
+    return content+"\n";
 }
 
 
 string rtr(string name, int client, int data_channel, map<int,string> c_directory)
 {
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    string s(cwd);
+    string file_content = get_file_content((s+"/"+ name).c_str());
+    ifstream in_file(name, ios::binary);
+    in_file.seekg(0, ios::end);
+    int file_size = in_file.tellg();
+    if (size[client] >= file_size)
+    {
+        if (send_data_to_client(data_channel,file_content))
+        {
+            size[client] -= file_size;
+            fstream file = create_log();
+            time_t my_time = time(NULL); 
+            file << "file " + name + " downloaded by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
+            return download_st;
+        }
+    }
+    else
+        return data;
     
-    string file_content = get_file_content((c_directory[client]+"/"+ name).c_str());
-    send_data_to_client(data_channel,file_content);
-    //download
-    fstream file = create_log();
-    time_t my_time = time(NULL); 
-    file << "file " + name + " downloaded by user " + client_user[client] + ": " + ctime(&my_time) << "\n";
-    return download_st;
+    return error;
 }
 
 string help()
@@ -210,8 +233,12 @@ string quit(int client, map <int, string> &c_directory)
 {
     client_user.erase(client);
     c_directory.erase(client);
+    size.erase(client);
     user_login.erase(remove(user_login.begin(), user_login.end(), client), user_login.end());
     user_admin.erase(remove(user_admin.begin(), user_admin.end(), client), user_admin.end());
+    fstream file = create_log();
+    time_t my_time = time(NULL); 
+    file << "user " + client_user[client] + " logged out: " + ctime(&my_time) << "\n";
     return logout;
 }
 
