@@ -2,11 +2,15 @@
 
 fd_set readfds;
 map <int, string> c_directory;
+string server_path;
 
 int main(int argc , char *argv[]) 
 {
-	int port = atoi(argv[1]);
-	int data_port = atoi(argv[2]);
+	
+    Json::Value config = read_json();
+    int port = config["commandChannelPort"].asInt();
+    int data_port = config["dataChannelPort"].asInt();
+
 	int activity,i; 
 	int max_sd;
 	int max_data_sd;

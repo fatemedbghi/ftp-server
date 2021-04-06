@@ -1,5 +1,5 @@
 CC = g++
-FLAGS = -std=c++11
+FLAGS = -std=c++11 -ljsoncpp
 COMPILE_FLAGS = $(FLAGS) -c 
 
 all: client

@@ -14,6 +14,7 @@ Json::Value read_json()
     return root;
 }
 
+
 string check_username(string username, Json::Value root, int client)
 {
     for (int i=0; i<root["users"].size(); i++)

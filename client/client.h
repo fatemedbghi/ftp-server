@@ -47,5 +47,7 @@ int data_port, server_port;
 int connect_to_server(int port);
 void interact_with_server(int client_to_server, int data_channel);
 string pwd();
+Json::Value read_json();
+void assign_ports();
 
 #endif

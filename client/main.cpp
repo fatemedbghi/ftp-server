@@ -2,14 +2,20 @@
 
 int main(int argc , char *argv[])
 {
-    server_port = atoi(argv[1]);
-    data_port = atoi(argv[2]);
+    assign_ports();
     client_to_server = connect_to_server(server_port);
     data_channel = connect_to_server(data_port);
 
     interact_with_server(client_to_server, data_channel);
 
     return 0;
+}
+
+void assign_ports()
+{
+    Json::Value config = read_json();
+    server_port = config["commandChannelPort"].asInt();
+    data_port = config["dataChannelPort"].asInt();
 }
 
 int connect_to_server(int port)
@@ -97,4 +103,13 @@ string pwd()
        return cwd;
     }
     return "";
+}
+
+Json::Value read_json() 
+{
+    ifstream file_input("config.json");
+    Json::Reader reader;
+    Json::Value root;
+    reader.parse(file_input, root);
+    return root;
 }
