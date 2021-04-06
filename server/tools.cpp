@@ -208,7 +208,12 @@ string rtr(string name, int client, int data_channel, map<int,string> c_director
         }
     }
     else
+    {
+
+        send_data_to_client(data_channel,"");
         return data;
+    }
+        
     
     return error;
 }
@@ -363,7 +368,6 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
     
     else if (tokens[0].compare(commands[RETR]) == 0 && tokens.size() == RETR_TOKEN)
     {
-        cout << tokens.size();
         if (check_if_logged_in(client) == 1)
         {
             if (check_if_file_accessed(client, files, tokens[1]) == 1)
