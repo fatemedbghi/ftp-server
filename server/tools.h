@@ -46,6 +46,19 @@
 #define QUIT 10
 #define max_clients 30
 
+#define USER_TOKEN 2
+#define PASS_TOKEN  2
+#define PWD_TOKEN  1
+#define MKD_TOKEN  2
+#define DELE_TOKEN  3
+#define LS_TOKEN  1
+#define CWD_TOKEN  2
+#define RENAME_TOKEN  3
+#define RETR_TOKEN  2
+#define HELP_TOKEN 1
+#define QUIT_TOKEN 1
+
+
 using namespace std;
 
 const string valid_username = "331: User name okay, need password.\n";

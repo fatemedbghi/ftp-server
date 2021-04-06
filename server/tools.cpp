@@ -305,27 +305,27 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
         tokens.push_back(intermediate); 
     } 
 
-    if (tokens[0].compare(commands[USER]) == 0)
+    if (tokens[0].compare(commands[USER]) == 0 && tokens.size() == USER_TOKEN)
         return check_username(tokens[1], root, client);
 
-    if (tokens[0].compare(commands[PASS]) == 0)
+    else if (tokens[0].compare(commands[PASS]) == 0 && tokens.size() == PASS_TOKEN)
         return check_password(client, tokens[1], root);
     
-    if (tokens[0].compare(commands[PWD]) == 0)
+    else if (tokens[0].compare(commands[PWD]) == 0 && tokens.size() == PWD_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
             return pwd(client, c_directory);
         return not_logged_in;
     }
 
-    if (tokens[0].compare(commands[MKD]) == 0)
+    else if (tokens[0].compare(commands[MKD]) == 0 && tokens.size() == MKD_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
             return mkd(tokens[1], client, c_directory);
         return not_logged_in;
     }
 
-    if (tokens[0].compare(commands[DELE]) == 0)
+    else if (tokens[0].compare(commands[DELE]) == 0 && tokens.size() == DELE_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
         {
@@ -337,21 +337,21 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
         return not_logged_in;
     }   
 
-    if (tokens[0].compare(commands[LS]) == 0)
+    else if (tokens[0].compare(commands[LS]) == 0 && tokens.size() == LS_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
             return ls(client, data_channel, c_directory).list_transfer;
         return not_logged_in;
     } 
 
-    if (tokens[0].compare(commands[CWD]) == 0)
+    else if (tokens[0].compare(commands[CWD]) == 0 && tokens.size() == CWD_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
             return cwd(tokens[1], client, c_directory);
         return not_logged_in;
     }
 
-    if (tokens[0].compare(commands[RENAME]) == 0)
+    else if (tokens[0].compare(commands[RENAME]) == 0 && tokens.size() == RENAME_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
         {
@@ -362,7 +362,7 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
         return not_logged_in;
     }
 
-    if (tokens[0].compare(commands[RETR]) == 0)
+    else if (tokens[0].compare(commands[RETR]) == 0 && tokens.size() == RETR_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
         {
@@ -373,19 +373,20 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
         return not_logged_in;
     }
 
-    if (tokens[0].compare(commands[HELP]) == 0)
+    else if (tokens[0].compare(commands[HELP]) == 0 && tokens.size() == HELP_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
             return help();
         return not_logged_in;
     }
     
-    if (tokens[0].compare(commands[QUIT]) == 0)
+    else if (tokens[0].compare(commands[QUIT]) == 0 && tokens.size() == QUIT_TOKEN)
     {
         if (check_if_logged_in(client) == 1)
             return quit(client, c_directory);
         return not_logged_in;
     }
 
-    return syntax;
+    else
+        return syntax;
 }
