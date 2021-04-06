@@ -299,12 +299,11 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
     string intermediate; 
     Json::Value root = read_json();
     vector <string> files = unaccessed_files(root);
-
+    
     while(getline(check1, intermediate, ' ')) 
     { 
         tokens.push_back(intermediate); 
     } 
-
     if (tokens[0].compare(commands[USER]) == 0 && tokens.size() == USER_TOKEN)
         return check_username(tokens[1], root, client);
 
@@ -361,9 +360,10 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
         }
         return not_logged_in;
     }
-
+    
     else if (tokens[0].compare(commands[RETR]) == 0 && tokens.size() == RETR_TOKEN)
     {
+        cout << tokens.size();
         if (check_if_logged_in(client) == 1)
         {
             if (check_if_file_accessed(client, files, tokens[1]) == 1)
