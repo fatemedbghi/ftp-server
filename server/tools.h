@@ -74,7 +74,7 @@ const string logout = "221: Successful Quit.\n";
 const string not_logged_in = "332: Need account for login.\n";
 const string syntax = "501: Syntax error in parameters or arguments.\n";
 const string error = "500: Error\n";
-const string data = "425: Can't open data connection.";
+const string data = "425: Can't open data connection.\n";
 
 struct ls_out { 
     // vector <string> list;

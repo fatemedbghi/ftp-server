@@ -73,7 +73,7 @@ void interact_with_server(int client_to_server, int data_channel)
         string token;
         ss >> token;
        
-        if ((token.compare(LS) == 0 && token.size() == 1) || (token.compare(RETR) == 0 && token.size() == 2))
+        if (token.compare(LS) == 0 || token.compare(RETR) == 0)
         {
             char response_data[2048];
             memset(response_data, 0, sizeof(response_data));

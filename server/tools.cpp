@@ -209,8 +209,7 @@ string rtr(string name, int client, int data_channel, map<int,string> c_director
     }
     else
     {
-
-        send_data_to_client(data_channel,"");
+        send_data_to_client(data_channel," ");
         return data;
     }
         
@@ -341,7 +340,7 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
         return not_logged_in;
     }   
 
-    else if (tokens[0].compare(commands[LS]) == 0 && tokens.size() == LS_TOKEN)
+    else if (tokens[0].compare(commands[LS]) == 0)
     {
         if (check_if_logged_in(client) == 1)
             return ls(client, data_channel, c_directory).list_transfer;
@@ -366,7 +365,7 @@ string handle_input(string input, int client, int data_channel, map<int,string> 
         return not_logged_in;
     }
     
-    else if (tokens[0].compare(commands[RETR]) == 0 && tokens.size() == RETR_TOKEN)
+    else if (tokens[0].compare(commands[RETR]) == 0)
     {
         if (check_if_logged_in(client) == 1)
         {
